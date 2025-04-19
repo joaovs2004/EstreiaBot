@@ -1,0 +1,39 @@
+package main
+
+import (
+	"context"
+	"os"
+	"os/signal"
+
+	// "estreiaBot/database"
+	"estreiaBot/handlers"
+  "estreiaBot/utils"
+
+	"github.com/go-telegram/bot"
+)
+
+func main() {
+  // db := database.InitDb()
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
+	opts := []bot.Option{
+		bot.WithDefaultHandler(handlers.DefaultHandler),
+    bot.WithCallbackQueryDataHandler("show", bot.MatchTypePrefix, handlers.CallbackHandler),
+	}
+
+  telegramToken := utils.GetDotenvValue("TELEGRAM_TOKEN")
+
+	b, err := bot.New(telegramToken, opts...)
+	if err != nil {
+		panic(err)
+	}
+
+  b.RegisterHandler(bot.HandlerTypeMessageText, "listar", bot.MatchTypeCommand, handlers.ListHandler)
+  b.RegisterHandler(bot.HandlerTypeMessageText, "buscar", bot.MatchTypeCommand, handlers.SearchHandler)
+
+
+	b.Start(ctx)
+}
+
