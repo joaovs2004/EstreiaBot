@@ -86,7 +86,7 @@ func DefaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	} else {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   update.Message.Text,
+			Text:   "Utilize o comando /buscar para buscar uma série ou /listar para listar suas séries cadastradas",
 		})
 	}
 }
