@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"context"
-	"estreiaBot/api"
 	"estreiaBot/database"
+	"estreiaBot/tmdb"
 	"estreiaBot/utils"
 	"fmt"
 	"strconv"
@@ -53,7 +53,7 @@ func SearchHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func SearchState(ctx context.Context, b *bot.Bot, update *models.Update) {
-	data := api.SearchShow(update.Message.Text)
+	data := tmdb.SearchShow(update.Message.Text)
 	chatId := update.Message.Chat.ID
 
 	if len(data.Results) == 0 {

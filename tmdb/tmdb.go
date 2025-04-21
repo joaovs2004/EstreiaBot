@@ -1,11 +1,10 @@
-package api
+package tmdb
 
 import (
 	"encoding/json"
 	"estreiaBot/utils"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 )
 
@@ -24,13 +23,7 @@ func SearchShow(showName string) SearchShowResult {
 	showName = strings.ReplaceAll(showName, " ", "%20")
 	url := fmt.Sprintf("https://api.themoviedb.org/3/search/tv?query=%s&include_adult=false&language=en-US&page=1", showName)
 
-	tmdbApiKey := utils.GetDotenvValue("TMDB_API_KEY")
-
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("Authorization", "Bearer "+tmdbApiKey)
-
-	res, _ := http.DefaultClient.Do(req)
+	res := utils.MakeApiRequest(url)
 
 	defer res.Body.Close()
 
@@ -47,13 +40,7 @@ func SearchShow(showName string) SearchShowResult {
 func GetLastSeason(showID string) int {
 	url := fmt.Sprintf("https://api.themoviedb.org/3/tv/%s?language=en-US", showID)
 
-	tmdbApiKey := utils.GetDotenvValue("TMDB_API_KEY")
-
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("accept", "application/json")
-	req.Header.Add("Authorization", "Bearer "+tmdbApiKey)
-
-	res, _ := http.DefaultClient.Do(req)
+	res := utils.MakeApiRequest(url)
 
 	defer res.Body.Close()
 
@@ -65,8 +52,6 @@ func GetLastSeason(showID string) int {
 	}
 
 	lastSeason := int(data["number_of_seasons"].(float64))
-
-	fmt.Println("Last season:", lastSeason)
 
 	return lastSeason
 }

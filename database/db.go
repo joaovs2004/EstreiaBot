@@ -1,9 +1,7 @@
 package database
 
 import (
-	"fmt"
-
-	"estreiaBot/api"
+	"estreiaBot/tmdb"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -29,7 +27,6 @@ func CreateUser(telegramID int64) {
 	result := DB.First(&user, "telegram_id = ?", telegramID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			fmt.Println(telegramID)
 			user = Client{TelegramID: telegramID}
 			DB.Create(&user)
 		}
@@ -44,7 +41,7 @@ func CreateShow(showId string, showName string) {
 	result := DB.First(&show, "show_id = ?", showId)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			showLastSeason := api.GetLastSeason(showId)
+			showLastSeason := tmdb.GetLastSeason(showId)
 			show = TvShow{ShowID: showId, Name: showName, LastSeason: showLastSeason}
 			DB.Create(&show)
 		}
