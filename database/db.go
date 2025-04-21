@@ -1,29 +1,13 @@
-package main
+package database
 
 import (
 	"fmt"
 
+	"estreiaBot/api"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
-type Client struct {
-	gorm.Model
-	TelegramID int64
-}
-
-type TvShow struct {
-	gorm.Model
-	ShowID     string
-	Name       string
-	LastSeason int
-}
-
-type ClientSubscription struct {
-	gorm.Model
-	ClientID int64
-	ShowID   string
-}
 
 var DB *gorm.DB
 var err error
@@ -60,7 +44,7 @@ func CreateShow(showId string, showName string) {
 	result := DB.First(&show, "show_id = ?", showId)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			showLastSeason := GetLastSeason(showId)
+			showLastSeason := api.GetLastSeason(showId)
 			show = TvShow{ShowID: showId, Name: showName, LastSeason: showLastSeason}
 			DB.Create(&show)
 		}

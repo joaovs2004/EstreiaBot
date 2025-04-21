@@ -1,7 +1,8 @@
-package main
+package api
 
 import (
 	"encoding/json"
+	"estreiaBot/utils"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,7 +24,7 @@ func SearchShow(showName string) SearchShowResult {
 	showName = strings.ReplaceAll(showName, " ", "%20")
 	url := fmt.Sprintf("https://api.themoviedb.org/3/search/tv?query=%s&include_adult=false&language=en-US&page=1", showName)
 
-	tmdbApiKey := GetDotenvValue("TMDB_API_KEY")
+	tmdbApiKey := utils.GetDotenvValue("TMDB_API_KEY")
 
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("accept", "application/json")
@@ -46,7 +47,7 @@ func SearchShow(showName string) SearchShowResult {
 func GetLastSeason(showID string) int {
 	url := fmt.Sprintf("https://api.themoviedb.org/3/tv/%s?language=en-US", showID)
 
-	tmdbApiKey := GetDotenvValue("TMDB_API_KEY")
+	tmdbApiKey := utils.GetDotenvValue("TMDB_API_KEY")
 
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("accept", "application/json")

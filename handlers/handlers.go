@@ -1,7 +1,10 @@
-package main
+package handlers
 
 import (
 	"context"
+	"estreiaBot/api"
+	"estreiaBot/database"
+	"estreiaBot/utils"
 	"fmt"
 	"strconv"
 	"strings"
@@ -16,14 +19,14 @@ func ListHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	chatId := update.Message.Chat.ID
 	waitingForSearch[chatId] = true
 
-	subscriptions := GetClientSubscriptions(chatId)
+	subscriptions := database.GetClientSubscriptions(chatId)
 
 	if len(subscriptions) == 0 {
-		BotSendMessage("Você não possui nenhuma série cadastrada", chatId, ctx, b)
+		utils.BotSendMessage("Você não possui nenhuma série cadastrada", chatId, ctx, b)
 		return
 	}
 
-	BotSendMessage("Suas séries cadastradas:", chatId, ctx, b)
+	utils.BotSendMessage("Suas séries cadastradas:", chatId, ctx, b)
 
 	for _, subscription := range subscriptions {
 		callBackDataShow := fmt.Sprintf("removeshow_%s_%s", subscription.ShowID, subscription.Name)
@@ -46,15 +49,15 @@ func SearchHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	chatId := update.Message.Chat.ID
 	waitingForSearch[chatId] = true
 
-	BotSendMessage("Digite o nome da serie que voce quer buscar", chatId, ctx, b)
+	utils.BotSendMessage("Digite o nome da serie que voce quer buscar", chatId, ctx, b)
 }
 
 func SearchState(ctx context.Context, b *bot.Bot, update *models.Update) {
-	data := SearchShow(update.Message.Text)
+	data := api.SearchShow(update.Message.Text)
 	chatId := update.Message.Chat.ID
 
 	if len(data.Results) == 0 {
-		BotSendMessage("Nenhuma serie encontrada com esse nome", chatId, ctx, b)
+		utils.BotSendMessage("Nenhuma serie encontrada com esse nome", chatId, ctx, b)
 	} else if len(data.Results) > 0 {
 		for _, show := range data.Results {
 			callBackDataShow := fmt.Sprintf("addshow_%s_%s", strconv.Itoa(show.Id), show.OriginalName)
@@ -99,9 +102,9 @@ func AddCallbackHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 	showName := showInfo[2]
 
 	telegramID := update.CallbackQuery.Message.Message.Chat.ID
-	CreateUser(telegramID)
-	CreateShow(showId, showName)
-	CreateClientSubscription(telegramID, showId)
+	database.CreateUser(telegramID)
+	database.CreateShow(showId, showName)
+	database.CreateClientSubscription(telegramID, showId)
 
 	message := fmt.Sprintf("Adicionando a série %s na sua lista", showName)
 
@@ -124,7 +127,7 @@ func RemoveCallbackHandler(ctx context.Context, b *bot.Bot, update *models.Updat
 
 	telegramID := update.CallbackQuery.Message.Message.Chat.ID
 
-	RemoveClientSubscription(telegramID, showId)
+	database.RemoveClientSubscription(telegramID, showId)
 
 	message := fmt.Sprintf("Removendo a série %s da sua lista", showName)
 
