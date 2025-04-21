@@ -17,7 +17,6 @@ var waitingForSearch = make(map[int64]bool)
 
 func ListHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	chatId := update.Message.Chat.ID
-	waitingForSearch[chatId] = true
 
 	subscriptions := database.GetClientSubscriptions(chatId)
 
@@ -136,4 +135,22 @@ func RemoveCallbackHandler(ctx context.Context, b *bot.Bot, update *models.Updat
 		ChatID: telegramID,
 		Text:   message,
 	})
+}
+
+func CheckForNewSeasons(ctx context.Context, b *bot.Bot) {
+	subscriptions := database.GetAllSubscriptions()
+
+	for _, subscription := range subscriptions {
+		latestSeason := tmdb.GetLastSeason(subscription.ShowID)
+		show := database.GetShow(subscription.ShowID)
+
+		if latestSeason > show.LastSeason {
+			// Update the last season in the database
+			database.UpdateLastSeason(subscription.ShowID, latestSeason)
+
+			// Notify the user about the new season
+			message := fmt.Sprintf("A nova temporada (%d) da série %s foi lançada!", latestSeason, show.Name)
+			utils.BotSendMessage(message, subscription.ClientID, ctx, b)
+		}
+	}
 }

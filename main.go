@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"time"
 
 	"estreiaBot/database"
 	"estreiaBot/handlers"
@@ -33,6 +34,21 @@ func main() {
 
 	b.RegisterHandler(bot.HandlerTypeMessageText, "listar", bot.MatchTypeCommand, handlers.ListHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "buscar", bot.MatchTypeCommand, handlers.SearchHandler)
+
+	// Periodically check for new seasons
+	go func() {
+		ticker := time.NewTicker(24 * time.Hour) // Check once a day
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				handlers.CheckForNewSeasons(ctx, b)
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 
 	b.Start(ctx)
 }

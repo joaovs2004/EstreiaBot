@@ -48,6 +48,35 @@ func CreateShow(showId string, showName string) {
 	}
 }
 
+func GetShow(showId string) TvShow {
+	var show TvShow
+
+	// Check if the show exists
+	result := DB.First(&show, "show_id = ?", showId)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return TvShow{}
+		}
+	}
+
+	return show
+}
+
+func UpdateLastSeason(showId string, lastSeason int) {
+	var show TvShow
+
+	// Check if the show exists
+	result := DB.First(&show, "show_id = ?", showId)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return
+		}
+	}
+
+	show.LastSeason = lastSeason
+	DB.Save(&show)
+}
+
 // checks if the client subscription exists in the database, and creates them if they don't
 func CreateClientSubscription(clientID int64, showID string) {
 	var clientSubscription ClientSubscription
@@ -76,6 +105,12 @@ func GetClientSubscriptions(clientID int64) []TvShow {
 		subscriptions = append(subscriptions, show)
 	}
 
+	return subscriptions
+}
+
+func GetAllSubscriptions() []ClientSubscription {
+	var subscriptions []ClientSubscription
+	DB.Find(&subscriptions)
 	return subscriptions
 }
 
